@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Vijaya Power</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500&display=swap');
+
+:root{
+  --ink:#12151c;
+  --surface:#191d26;
+  --surface-2:#20242f;
+  --line:#2b3040;
+  --text:#e7e9ee;
+  --text-dim:#8b91a3;
+  --gold:#d1a24a;
+  --gold-dim:#8a723a;
+  --up:#3ecf8e;
+  --up-dim:#1d3a2e;
+  --down:#e8615a;
+  --down-dim:#3a2323;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--ink);color:var(--text);font-family:'Inter',sans-serif;}
+body{padding-bottom:60px;}
+
+/* ---- Ticker tape ---- */
+.ticker-wrap{
+  width:100%;
+  overflow:hidden;
+  background:var(--surface);
+  border-bottom:1px solid var(--line);
+  padding:10px 0;
+  position:relative;
+}
+.ticker-wrap::before,.ticker-wrap::after{
+  content:"";
+  position:absolute;top:0;bottom:0;width:60px;z-index:2;
+}
+.ticker-wrap::before{left:0;background:linear-gradient(90deg,var(--surface),transparent);}
+.ticker-wrap::after{right:0;background:linear-gradient(270deg,var(--surface),transparent);}
+.ticker-track{
+  display:flex;
+  width:max-content;
+  animation:scroll 38s linear infinite;
+}
+.ticker-item{
+  display:flex;align-items:baseline;gap:8px;
+  padding:0 28px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:13px;
+  white-space:nowrap;
+  border-right:1px solid var(--line);
+}
+.ticker-item .sym{color:var(--text-dim);letter-spacing:.02em;}
+.ticker-item .px{color:var(--text);font-weight:600;}
+.ticker-item .chg.up{color:var(--up);}
+.ticker-item .chg.down{color:var(--down);}
+@keyframes scroll{
+  from{transform:translateX(0);}
+  to{transform:translateX(-50%);}
+}
+
+/* ---- Header ---- */
+header{
+  max-width:1180px;margin:0 auto;padding:36px 24px 8px;
+}
+header h1{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:32px;font-weight:700;margin:0 0 6px;
+  letter-spacing:-0.01em;
+}
+header p{color:var(--text-dim);margin:0 0 18px;font-size:14.5px;max-width:640px;line-height:1.5;}
+.notice{
+  max-width:1180px;margin:0 auto 20px;padding:14px 20px;
+  background:var(--surface-2);border:1px solid var(--line);border-left:3px solid var(--gold);
+  border-radius:6px;font-size:13.5px;color:var(--text-dim);line-height:1.55;
+}
+.notice b{color:var(--gold);font-weight:600;}
+
+/* ---- Grid ---- */
+.grid{
+  max-width:1180px;margin:0 auto;padding:8px 24px 40px;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));
+  gap:16px;
+}
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:18px 18px 16px;cursor:pointer;transition:border-color .15s ease, transform .15s ease;
+}
+.card:hover{border-color:#3a4053;transform:translateY(-1px);}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px;}
+.card-top .name{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:16.5px;}
+.card-top .sector{color:var(--text-dim);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+.price-row{display:flex;align-items:baseline;gap:10px;margin:10px 0 4px;}
+.price{font-family:'IBM Plex Mono',monospace;font-size:22px;font-weight:600;}
+.change{font-family:'IBM Plex Mono',monospace;font-size:13.5px;font-weight:500;}
+.change.up{color:var(--up);} .change.down{color:var(--down);}
+
+.spark{width:100%;height:52px;display:block;margin:8px 0 10px;}
+
+.meta-row{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;margin-bottom:12px;}
+
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 12px;border-radius:6px;font-size:12.5px;font-weight:600;
+  font-family:'Space Grotesk',sans-serif;letter-spacing:.02em;width:100%;
+}
+.badge .dot{width:7px;height:7px;border-radius:50%;}
+.badge.buy{background:var(--up-dim);color:var(--up);}
+.badge.buy .dot{background:var(--up);}
+.badge.sell{background:var(--down-dim);color:var(--down);}
+.badge.sell .dot{background:var(--down);}
+.badge.watch{background:#332b18;color:var(--gold);}
+.badge.watch .dot{background:var(--gold);}
+
+.reason{font-size:12px;color:var(--text-dim);margin-top:8px;line-height:1.5;}
+
+/* ---- Detail panel ---- */
+.overlay{
+  position:fixed;inset:0;background:rgba(8,9,13,.7);
+  display:none;align-items:center;justify-content:center;z-index:50;padding:20px;
+}
+.overlay.open{display:flex;}
+.panel{
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  max-width:640px;width:100%;max-height:88vh;overflow-y:auto;padding:28px 28px 24px;
+}
+.panel-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.panel-head h2{font-family:'Space Grotesk',sans-serif;font-size:22px;margin:0;}
+.panel-head .close{cursor:pointer;color:var(--text-dim);font-size:22px;line-height:1;background:none;border:none;}
+.big-chart{width:100%;height:180px;display:block;margin:14px 0 18px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.stat{background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;}
+.stat .label{font-size:10.5px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;}
+.stat .value{font-family:'IBM Plex Mono',monospace;font-size:15px;margin-top:3px;}
+.signal-detail{padding:14px 16px;border-radius:8px;font-size:13.5px;line-height:1.6;}
+
+footer{max-width:1180px;margin:0 auto;padding:0 24px 40px;color:var(--text-dim);font-size:12px;line-height:1.6;}
+footer a{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<div class="ticker-wrap"><div class="ticker-track" id="tickerTrack"></div></div>
+
+<header>
+  <h1>Vijaya Power</h1>
+  <p>Intraday read on your eight-stock watchlist — VWAP, moving-average crossovers, volume spikes and range breakouts rolled into one entry/exit read per stock.</p>
+</header>
+
+<div class="notice" id="dataNotice">
+  Loading signals…
+</div>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  Signals combine VWAP position, 9/21 MA crossover, volume vs 20-period average, and proximity to the session's high/low range. This is a decision-support read, not a prediction — always confirm with your own judgment before placing a trade.
+</footer>
+
+<div class="overlay" id="overlay">
+  <div class="panel" id="panel"></div>
+</div>
+
+<script>
+const STOCKS = [
+  {sym:"KALYANKJIL", name:"Kalyan Jewellers", sector:"Jewellery", base:555},
+  {sym:"ETERNAL", name:"Eternal (Zomato)", sector:"Food delivery", base:295},
+  {sym:"CUB", name:"City Union Bank", sector:"Banking", base:192},
+  {sym:"APOLLOMICR", name:"Apollo Micro Systems", sector:"Defence electronics", base:148},
+  {sym:"ADVANCEAGRO", name:"Advance Agrolife", sector:"Agro chemicals", base:88},
+  {sym:"NUVOCO", name:"Nuvoco Vistas", sector:"Cement", base:342},
+  {sym:"BSOFT", name:"Birlasoft", sector:"IT services", base:432},
+  {sym:"PHYSICSWALLAH", name:"PhysicsWallah", sector:"Ed-tech", base:132},
+];
+
+function seededRandom(seed){
+  let s = seed;
+  return function(){
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+}
+
+function genCandles(base, seed){
+  const rnd = seededRandom(seed);
+  const n = 75; // ~5-min candles, 9:15 to 15:30
+  let price = base * (0.985 + rnd()*0.03);
+  const candles = [];
+  let avgVol = 40000 + rnd()*30000;
+  for(let i=0;i<n;i++){
+    const drift = (rnd()-0.5) * base * 0.006;
+    const open = price;
+    const close = open + drift;
+    const high = Math.max(open,close) + rnd()*base*0.0025;
+    const low = Math.min(open,close) - rnd()*base*0.0025;
+    let vol = avgVol * (0.5 + rnd()*1.1);
+    if(rnd() > 0.92) vol *= 2.2 + rnd()*1.5; // occasional spike
+    candles.push({open,close,high,low,vol});
+    price = close;
+  }
+  return candles;
+}
+
+function computeSignal(candles){
+  const n = candles.length;
+  const closes = candles.map(c=>c.close);
+  const vols = candles.map(c=>c.vol);
+
+  // VWAP
+  let cumPV=0, cumV=0;
+  candles.forEach(c=>{ cumPV += c.close*c.vol; cumV += c.vol; });
+  const vwap = cumPV/cumV;
+
+  // Moving averages
+  const sma = (arr,p)=> arr.slice(-p).reduce((a,b)=>a+b,0)/p;
+  const ma9 = sma(closes,9);
+  const ma21 = sma(closes,21);
+  const prevMa9 = sma(closes.slice(0,-1),9);
+  const prevMa21 = sma(closes.slice(0,-1),21);
+  const crossUp = prevMa9 <= prevMa21 && ma9 > ma21;
+  const crossDown = prevMa9 >= prevMa21 && ma9 < ma21;
+
+  // Volume spike
+  const avgVol20 = sma(vols,20);
+  const lastVol = vols[n-1];
+  const volSpike = lastVol > avgVol20 * 1.6;
+
+  // Range breakout
+  const recentHigh = Math.max(...candles.slice(-20).map(c=>c.high));
+  const recentLow = Math.min(...candles.slice(-20).map(c=>c.low));
+  const last = closes[n-1];
+  const nearHigh = last > recentHigh * 0.997;
+  const nearLow = last < recentLow * 1.003;
+
+  let score = 0;
+  const reasons = [];
+  if(last > vwap){ score += 1; reasons.push("trading above VWAP"); } else { score -=1; reasons.push("trading below VWAP"); }
+  if(crossUp){ score += 2; reasons.push("9/21 MA bullish crossover"); }
+  if(crossDown){ score -= 2; reasons.push("9/21 MA bearish crossover"); }
+  if(volSpike){ score += (last>vwap?1:-1); reasons.push("volume spike vs 20-period avg"); }
+  if(nearHigh){ score += 1; reasons.push("pressing session high — breakout zone"); }
+  if(nearLow){ score -= 1; reasons.push("pressing session low — breakdown zone"); }
+
+  let signal = "watch";
+  if(score >= 2) signal = "buy";
+  else if(score <= -2) signal = "sell";
+
+  return {vwap, ma9, ma21, volSpike, nearHigh, nearLow, signal, reasons, last, recentHigh, recentLow, avgVol20, lastVol};
+}
+
+function sparkPoints(closes, w, h){
+  const min = Math.min(...closes), max = Math.max(...closes);
+  const range = (max-min) || 1;
+  return closes.map((c,i)=>{
+    const x = (i/(closes.length-1))*w;
+    const y = h - ((c-min)/range)*h;
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(" ");
+}
+
+function sparkSVG(closes, up, w=300, h=52){
+  const pts = sparkPoints(closes, w, h);
+  const color = up ? "var(--up)" : "var(--down)";
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+  </svg>`;
+}
+
+const grid = document.getElementById("grid");
+const tickerTrack = document.getElementById("tickerTrack");
+const overlay = document.getElementById("overlay");
+const panel = document.getElementById("panel");
+const notice = document.getElementById("dataNotice");
+const dataStore = {};
+
+// ---- Build a normalized stock record from either real (signals.json)
+// or simulated data, so rendering code is identical either way. ----
+function normalizeSimulated(s, idx){
+  const candles = genCandles(s.base, idx*137 + 91);
+  const sig = computeSignal(candles);
+  const closes = candles.map(c=>c.close);
+  const last = closes[closes.length-1];
+  const chg = ((last-closes[0])/closes[0])*100;
+  return {
+    sym: s.sym, name: s.name, sector: s.sector, closes, last, chg,
+    vwap: sig.vwap, ma9: sig.ma9, ma21: sig.ma21,
+    recentHigh: sig.recentHigh, recentLow: sig.recentLow,
+    lastVol: sig.lastVol, avgVol20: sig.avgVol20,
+    signal: sig.signal, reasons: sig.reasons,
+  };
+}
+
+function normalizeReal(entry, fallback){
+  const closes = (entry.closes && entry.closes.length) ? entry.closes : [entry.last || 0, entry.last || 0];
+  const chg = ((closes[closes.length-1]-closes[0])/(closes[0]||1))*100;
+  return {
+    sym: fallback.sym, name: fallback.name, sector: fallback.sector, closes,
+    last: entry.last || closes[closes.length-1], chg,
+    vwap: entry.vwap || 0, ma9: entry.ma9 || 0, ma21: entry.ma21 || 0,
+    recentHigh: entry.recent_high || 0, recentLow: entry.recent_low || 0,
+    lastVol: entry.last_vol || 0, avgVol20: entry.avg_vol20 || 0,
+    signal: entry.signal || "watch", reasons: entry.reasons || [],
+  };
+}
+
+function renderAll(records){
+  grid.innerHTML = "";
+  tickerTrack.innerHTML = "";
+  records.forEach(r=>{
+    dataStore[r.sym] = r;
+    const up = r.chg >= 0;
+    const badgeClass = r.signal === "buy" ? "buy" : r.signal === "sell" ? "sell" : "watch";
+    const badgeLabel = r.signal === "buy" ? "Entry zone" : r.signal === "sell" ? "Exit zone" : (r.signal === "error" ? "Data issue" : "Hold / watch");
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-top">
+        <div>
+          <div class="name">${r.name}</div>
+          <div class="sector">${r.sector}</div>
+        </div>
+      </div>
+      <div class="price-row">
+        <span class="price">₹${r.last.toFixed(2)}</span>
+        <span class="change ${up?'up':'down'}">${up?'+':''}${r.chg.toFixed(2)}%</span>
+      </div>
+      ${sparkSVG(r.closes, up)}
+      <div class="meta-row">
+        <span>VWAP ₹${r.vwap.toFixed(2)}</span>
+        <span>Vol ${(r.lastVol/1000).toFixed(0)}K</span>
+      </div>
+      <div class="badge ${badgeClass}"><span class="dot"></span>${badgeLabel}</div>
+      <div class="reason">${(r.reasons||[]).slice(0,2).join(" · ")}</div>
+    `;
+    card.addEventListener("click", ()=> openPanel(r.sym));
+    grid.appendChild(card);
+
+    const tItem = document.createElement("div");
+    tItem.className = "ticker-item";
+    tItem.innerHTML = `<span class="sym">${r.sym}</span><span class="px">₹${r.last.toFixed(2)}</span><span class="chg ${up?'up':'down'}">${up?'▲':'▼'} ${Math.abs(r.chg).toFixed(2)}%</span>`;
+    tickerTrack.appendChild(tItem);
+  });
+  tickerTrack.innerHTML += tickerTrack.innerHTML; // seamless loop
+}
+
+function openPanel(sym){
+  const r = dataStore[sym];
+  const up = r.chg >= 0;
+  const badgeClass = r.signal === "buy" ? "buy" : r.signal === "sell" ? "sell" : "watch";
+  const badgeLabel = r.signal === "buy" ? "Entry zone" : r.signal === "sell" ? "Exit zone" : (r.signal === "error" ? "Data issue" : "Hold / watch");
+
+  panel.innerHTML = `
+    <div class="panel-head">
+      <div>
+        <h2>${r.name}</h2>
+        <div class="sector" style="color:var(--text-dim);font-size:12px;margin-top:4px;">${r.sym} · ${r.sector}</div>
+      </div>
+      <button class="close" id="closeBtn">&times;</button>
+    </div>
+    <div class="price-row">
+      <span class="price">₹${r.last.toFixed(2)}</span>
+      <span class="change ${up?'up':'down'}">${up?'+':''}${r.chg.toFixed(2)}%</span>
+    </div>
+    ${sparkSVG(r.closes, up, 580, 180).replace('class="spark"','class="big-chart"')}
+    <div class="stat-grid">
+      <div class="stat"><div class="label">VWAP</div><div class="value">₹${r.vwap.toFixed(2)}</div></div>
+      <div class="stat"><div class="label">9 / 21 MA</div><div class="value">${r.ma9.toFixed(2)} / ${r.ma21.toFixed(2)}</div></div>
+      <div class="stat"><div class="label">Session high / low</div><div class="value">₹${r.recentHigh.toFixed(2)} / ₹${r.recentLow.toFixed(2)}</div></div>
+      <div class="stat"><div class="label">Last vol vs 20-avg</div><div class="value">${(r.lastVol/1000).toFixed(0)}K / ${(r.avgVol20/1000).toFixed(0)}K</div></div>
+    </div>
+    <div class="badge ${badgeClass}" style="margin-bottom:10px;"><span class="dot"></span>${badgeLabel}</div>
+    <div class="signal-detail" style="background:var(--surface-2);border:1px solid var(--line);">
+      ${(r.reasons||[]).map(x=>"• "+x).join("<br>") || "No signal detail available."}
+    </div>
+  `;
+  document.getElementById("closeBtn").addEventListener("click", ()=> overlay.classList.remove("open"));
+  overlay.classList.add("open");
+}
+
+overlay.addEventListener("click", (e)=>{ if(e.target === overlay) overlay.classList.remove("open"); });
+
+// ---- Load real signals.json if present (GitHub Actions keeps it updated);
+// otherwise fall back to the simulated demo data. ----
+async function init(){
+  try{
+    const res = await fetch("./signals.json", {cache:"no-store"});
+    if(!res.ok) throw new Error("not found");
+    const json = await res.json();
+    const records = json.stocks.map(entry=>{
+      const fallback = STOCKS.find(s=> s.name === entry.name) || {sym:(entry.ticker||entry.name), name:entry.name, sector:""};
+      return normalizeReal(entry, fallback);
+    });
+    renderAll(records);
+    notice.innerHTML = `<b>Live data —</b> showing real signals updated ${new Date(json.updated_at).toLocaleString()} via GitHub Actions (Yahoo Finance, ~15 min delayed). Not investment advice.`;
+  }catch(e){
+    const records = STOCKS.map((s,idx)=> normalizeSimulated(s, idx));
+    renderAll(records);
+    notice.innerHTML = `<b>Demo data —</b> signals.json not found yet, so this is running on simulated candles. Once your GitHub Action runs at least once, this page will pick up real data automatically. Not investment advice.`;
+  }
+}
+init();
+</script>
+</body>
+</html>
